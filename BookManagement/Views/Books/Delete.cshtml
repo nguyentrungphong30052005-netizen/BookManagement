@@ -1,0 +1,64 @@
+﻿@model BookManagement.Models.Book
+
+@{
+    ViewData["Title"] = "Xóa sách";
+}
+
+<div class="container mt-4">
+
+    <h2>XÓA SÁCH</h2>
+
+    <div class="alert alert-danger">
+        Bạn có chắc chắn muốn xóa sách này không?
+    </div>
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            Mã sách
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Id
+        </dd>
+
+        <dt class="col-sm-3">
+            Tên sách
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Title
+        </dd>
+
+        <dt class="col-sm-3">
+            Tác giả
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Author
+        </dd>
+
+        <dt class="col-sm-3">
+            Giá
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Price.ToString("N0") VNĐ
+        </dd>
+
+    </dl>
+
+    <form asp-action="Delete" method="post">
+
+        <input type="hidden"
+               asp-for="Id" />
+
+        <button type="submit"
+                class="btn btn-danger">
+            Xác nhận xóa
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Hủy
+        </a>
+
+    </form>
+
+</div>

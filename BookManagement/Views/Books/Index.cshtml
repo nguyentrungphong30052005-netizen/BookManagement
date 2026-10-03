@@ -1,0 +1,78 @@
+﻿@model IEnumerable<BookManagement.Models.Book>
+
+@{
+    ViewData["Title"] = "Quản lý sách";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>QUẢN LÝ SÁCH</h2>
+
+        <a asp-action="Create" class="btn btn-primary">
+            + Thêm sách
+        </a>
+    </div>
+
+    <table class="table table-bordered table-hover">
+
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Tên sách</th>
+                <th>Tác giả</th>
+                <th>Nhà xuất bản</th>
+                <th>Giá</th>
+                <th>Ngày xuất bản</th>
+                <th>Chức năng</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @foreach (var book in Model)
+            {
+                <tr>
+                    <td>@book.Id</td>
+
+                    <td>@book.Title</td>
+
+                    <td>@book.Author</td>
+
+                    <td>@book.Publisher</td>
+
+                    <td>
+                        @book.Price.ToString("N0") VNĐ
+                    </td>
+
+                    <td>
+                        @book.PublishedDate.ToString("dd/MM/yyyy")
+                    </td>
+
+                    <td>
+                        <a asp-action="Details"
+                           asp-route-id="@book.Id"
+                           class="btn btn-info btn-sm">
+                            Chi tiết
+                        </a>
+
+                        <a asp-action="Edit"
+                           asp-route-id="@book.Id"
+                           class="btn btn-warning btn-sm">
+                            Sửa
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@book.Id"
+                           class="btn btn-danger btn-sm">
+                            Xóa
+                        </a>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
