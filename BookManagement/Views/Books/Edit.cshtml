@@ -6,19 +6,24 @@
 
 <div class="container mt-4">
 
-    <h2>SỬA THÔNG TIN SÁCH</h2>
+    <h1 class="fw-bold">
+        SỬA SÁCH
+    </h1>
 
-    <hr />
+    <form asp-action="Edit"
+          method="post"
+          enctype="multipart/form-data">
 
-    <form asp-action="Edit" method="post">
-
-        <input type="hidden" asp-for="Id" />
+        <input type="hidden"
+               asp-for="Id" />
 
         <div asp-validation-summary="ModelOnly"
              class="text-danger">
         </div>
 
+        <!-- Tên sách -->
         <div class="mb-3">
+
             <label asp-for="Title"
                    class="form-label">
             </label>
@@ -29,9 +34,12 @@
             <span asp-validation-for="Title"
                   class="text-danger">
             </span>
+
         </div>
 
+        <!-- Tác giả -->
         <div class="mb-3">
+
             <label asp-for="Author"
                    class="form-label">
             </label>
@@ -42,18 +50,24 @@
             <span asp-validation-for="Author"
                   class="text-danger">
             </span>
+
         </div>
 
+        <!-- Nhà xuất bản -->
         <div class="mb-3">
+
             <label asp-for="Publisher"
                    class="form-label">
             </label>
 
             <input asp-for="Publisher"
                    class="form-control" />
+
         </div>
 
+        <!-- Giá -->
         <div class="mb-3">
+
             <label asp-for="Price"
                    class="form-label">
             </label>
@@ -61,9 +75,16 @@
             <input asp-for="Price"
                    type="number"
                    class="form-control" />
+
+            <span asp-validation-for="Price"
+                  class="text-danger">
+            </span>
+
         </div>
 
+        <!-- Ngày xuất bản -->
         <div class="mb-3">
+
             <label asp-for="PublishedDate"
                    class="form-label">
             </label>
@@ -71,10 +92,52 @@
             <input asp-for="PublishedDate"
                    type="date"
                    class="form-control" />
+
         </div>
 
+        <!-- Ảnh hiện tại -->
+        @if (!string.IsNullOrEmpty(Model.ImageFileName))
+        {
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Ảnh hiện tại
+                </label>
+
+                <br />
+
+                <img src="~/images/books/@Model.ImageFileName"
+                     alt="Ảnh sách"
+                     style="width:150px;
+                height:200px;
+                object-fit:cover;
+                border-radius:8px;" />
+
+            </div>
+        }
+
+        <!-- Chọn ảnh mới -->
+        <div class="mb-3">
+
+            <label class="form-label">
+                Chọn ảnh mới
+            </label>
+
+            <input type="file"
+                   name="ImageFile"
+                   class="form-control"
+                   accept="image/*" />
+
+            <small class="text-muted">
+                Nếu không chọn ảnh mới thì ảnh hiện tại
+                sẽ được giữ nguyên.
+            </small>
+
+        </div>
+
+        <!-- Nút -->
         <button type="submit"
-                class="btn btn-primary">
+                class="btn btn-warning">
             Lưu thay đổi
         </button>
 
@@ -86,10 +149,3 @@
     </form>
 
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync(
-            "_ValidationScriptsPartial");
-    }
-}

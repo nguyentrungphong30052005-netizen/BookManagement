@@ -6,18 +6,24 @@
 
 <div class="container mt-4">
 
-    <h2>THÊM SÁCH</h2>
+    <h1 class="fw-bold">
+        THÊM SÁCH
+    </h1>
 
-    <hr />
-
-    <form asp-action="Create" method="post">
+    <form asp-action="Create"
+          method="post"
+          enctype="multipart/form-data">
 
         <div asp-validation-summary="ModelOnly"
              class="text-danger">
         </div>
 
+        <!-- Tên sách -->
         <div class="mb-3">
-            <label asp-for="Title" class="form-label"></label>
+
+            <label asp-for="Title"
+                   class="form-label">
+            </label>
 
             <input asp-for="Title"
                    class="form-control" />
@@ -25,10 +31,15 @@
             <span asp-validation-for="Title"
                   class="text-danger">
             </span>
+
         </div>
 
+        <!-- Tác giả -->
         <div class="mb-3">
-            <label asp-for="Author" class="form-label"></label>
+
+            <label asp-for="Author"
+                   class="form-label">
+            </label>
 
             <input asp-for="Author"
                    class="form-control" />
@@ -36,18 +47,24 @@
             <span asp-validation-for="Author"
                   class="text-danger">
             </span>
+
         </div>
 
+        <!-- Nhà xuất bản -->
         <div class="mb-3">
+
             <label asp-for="Publisher"
                    class="form-label">
             </label>
 
             <input asp-for="Publisher"
                    class="form-control" />
+
         </div>
 
+        <!-- Giá -->
         <div class="mb-3">
+
             <label asp-for="Price"
                    class="form-label">
             </label>
@@ -55,9 +72,16 @@
             <input asp-for="Price"
                    type="number"
                    class="form-control" />
+
+            <span asp-validation-for="Price"
+                  class="text-danger">
+            </span>
+
         </div>
 
+        <!-- Ngày xuất bản -->
         <div class="mb-3">
+
             <label asp-for="PublishedDate"
                    class="form-label">
             </label>
@@ -65,11 +89,31 @@
             <input asp-for="PublishedDate"
                    type="date"
                    class="form-control" />
+
+            <span asp-validation-for="PublishedDate"
+                  class="text-danger">
+            </span>
+
         </div>
 
+        <!-- Ảnh sách -->
+        <div class="mb-3">
+
+            <label class="form-label">
+                Ảnh sách
+            </label>
+
+            <input type="file"
+                   name="ImageFile"
+                   class="form-control"
+                   accept="image/*" />
+
+        </div>
+
+        <!-- Nút -->
         <button type="submit"
-                class="btn btn-success">
-            Thêm
+                class="btn btn-primary">
+            Thêm sách
         </button>
 
         <a asp-action="Index"
@@ -80,10 +124,3 @@
     </form>
 
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync(
-            "_ValidationScriptsPartial");
-    }
-}

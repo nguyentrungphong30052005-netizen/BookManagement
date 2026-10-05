@@ -19,14 +19,16 @@ namespace BookManagement.Models
         [Display(Name = "Nhà xuất bản")]
         public string? Publisher { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập giá")]
-        [Range(0, 100000000, ErrorMessage = "Giá phải lớn hơn hoặc bằng 0")]
-        [Display(Name = "Giá")]
+        [Range(0, 100000000, ErrorMessage = "Giá không hợp lệ")]
         [Column(TypeName = "decimal(18,2)")]
+        [Display(Name = "Giá")]
         public decimal Price { get; set; }
 
         [Display(Name = "Ngày xuất bản")]
         [DataType(DataType.Date)]
         public DateTime PublishedDate { get; set; }
+
+        [Display(Name = "Ảnh sách")]
+        public string? ImageFileName { get; set; }
     }
 }

@@ -1,20 +1,19 @@
 using BookManagement.Data;
+using BookManagement.Middlewares; // <-- 1. Thêm namespace chứa middleware của bạn ở đây
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Đăng ký MVC
 builder.Services.AddControllersWithViews();
 
-// Kết nối SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+        builder.Configuration.GetConnectionString(
+            "DefaultConnection")
     ));
 
 var app = builder.Build();
 
-// Cấu hình môi trường
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -23,13 +22,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Cho phép truy cập file trong wwwroot
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthorization();
 
-// Route mặc định
+// --- 2. ĐĂNG KÝ MIDDLEWARE TỰ TẠO TẠI ĐÂY ---
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Books}/{action=Index}/{id?}");
