@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BookManagement.Models.Book>
+@model IEnumerable<BookManagement.Models.Book>
 
 @{
     ViewData["Title"] = "Quản lý sách";
@@ -7,27 +7,42 @@
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold">QUẢN LÝ SÁCH</h1>
+
+        <h1 class="fw-bold">
+            QUẢN LÝ SÁCH
+        </h1>
 
         <a asp-action="Create"
            class="btn btn-primary">
             + Thêm sách
         </a>
+
     </div>
 
     <table class="table table-bordered table-hover align-middle">
 
         <thead class="table-dark">
+
             <tr>
+
                 <th>ID</th>
+
                 <th>Tên sách</th>
+
                 <th>Tác giả</th>
+
                 <th>Nhà xuất bản</th>
+
                 <th>Giá</th>
+
                 <th>Ngày xuất bản</th>
-                <th>Ảnh</th>
+
+                <th>Hình ảnh</th>
+
                 <th>Chức năng</th>
+
             </tr>
+
         </thead>
 
         <tbody>
@@ -36,31 +51,39 @@
             {
                 <tr>
 
+                    <!-- ID -->
                     <td>
                         @item.Id
                     </td>
 
+                    <!-- Tên sách -->
                     <td>
                         @item.Title
                     </td>
 
+                    <!-- Tác giả -->
                     <td>
                         @item.Author
                     </td>
 
+                    <!-- Nhà xuất bản -->
                     <td>
                         @item.Publisher
                     </td>
 
+                    <!-- Giá -->
                     <td>
                         @item.Price.ToString("N0") VNĐ
                     </td>
 
+                    <!-- Ngày xuất bản -->
                     <td>
                         @item.PublishedDate.ToString("dd/MM/yyyy")
                     </td>
 
+                    <!-- Hình ảnh -->
                     <td>
+
                         @if (!string.IsNullOrEmpty(item.ImageFileName))
                         {
                             <img src="~/images/books/@item.ImageFileName"
@@ -76,9 +99,12 @@
                                 Chưa có ảnh
                             </span>
                         }
+
                     </td>
 
+                    <!-- Chức năng -->
                     <td>
+
                         <a asp-action="Details"
                            asp-route-id="@item.Id"
                            class="btn btn-info">
@@ -96,6 +122,7 @@
                            class="btn btn-danger">
                             Xóa
                         </a>
+
                     </td>
 
                 </tr>
