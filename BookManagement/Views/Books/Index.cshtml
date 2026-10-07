@@ -1,135 +1,131 @@
-@model IEnumerable<BookManagement.Models.Book>
+@model BookManagement.Models.Book
 
 @{
-    ViewData["Title"] = "Quản lý sách";
+    ViewData["Title"] = "Thêm sách";
 }
 
-<div class="container mt-4">
+<h1>Thêm sách</h1>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<hr />
 
-        <h1 class="fw-bold">
-            QUẢN LÝ SÁCH
-        </h1>
+<div class="row">
+    <div class="col-md-6">
 
-        <a asp-action="Create"
-           class="btn btn-primary">
-            + Thêm sách
-        </a>
+        <form asp-action="Create"
+              method="post"
+              enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All"
+                 class="text-danger">
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Title"
+                       class="control-label">
+                </label>
+
+                <input asp-for="Title"
+                       class="form-control" />
+
+                <span asp-validation-for="Title"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Author"
+                       class="control-label">
+                </label>
+
+                <input asp-for="Author"
+                       class="form-control" />
+
+                <span asp-validation-for="Author"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Publisher"
+                       class="control-label">
+                </label>
+
+                <input asp-for="Publisher"
+                       class="form-control" />
+
+                <span asp-validation-for="Publisher"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Price"
+                       class="control-label">
+                </label>
+
+                <input asp-for="Price"
+                       class="form-control" />
+
+                <span asp-validation-for="Price"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="PublishedDate"
+                       class="control-label">
+                </label>
+
+                <input asp-for="PublishedDate"
+                       class="form-control" />
+
+                <span asp-validation-for="PublishedDate"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <!-- UPLOAD ẢNH -->
+            <div class="form-group mb-3">
+
+                <label class="control-label">
+                    Ảnh sách
+                </label>
+
+                <input type="file"
+                       name="ImageFile"
+                       class="form-control"
+                       accept=".jpg,.jpeg,.png" />
+
+                <small class="text-muted">
+                    Chỉ chấp nhận JPG, JPEG hoặc PNG.
+                    Kích thước tối đa 5MB.
+                </small>
+
+            </div>
+
+            <div class="form-group mt-3">
+
+                <input type="submit"
+                       value="Thêm sách"
+                       class="btn btn-primary" />
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+                    Quay lại
+                </a>
+
+            </div>
+
+        </form>
 
     </div>
-
-    <table class="table table-bordered table-hover align-middle">
-
-        <thead class="table-dark">
-
-            <tr>
-
-                <th>ID</th>
-
-                <th>Tên sách</th>
-
-                <th>Tác giả</th>
-
-                <th>Nhà xuất bản</th>
-
-                <th>Giá</th>
-
-                <th>Ngày xuất bản</th>
-
-                <th>Hình ảnh</th>
-
-                <th>Chức năng</th>
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            @foreach (var item in Model)
-            {
-                <tr>
-
-                    <!-- ID -->
-                    <td>
-                        @item.Id
-                    </td>
-
-                    <!-- Tên sách -->
-                    <td>
-                        @item.Title
-                    </td>
-
-                    <!-- Tác giả -->
-                    <td>
-                        @item.Author
-                    </td>
-
-                    <!-- Nhà xuất bản -->
-                    <td>
-                        @item.Publisher
-                    </td>
-
-                    <!-- Giá -->
-                    <td>
-                        @item.Price.ToString("N0") VNĐ
-                    </td>
-
-                    <!-- Ngày xuất bản -->
-                    <td>
-                        @item.PublishedDate.ToString("dd/MM/yyyy")
-                    </td>
-
-                    <!-- Hình ảnh -->
-                    <td>
-
-                        @if (!string.IsNullOrEmpty(item.ImageFileName))
-                        {
-                            <img src="~/images/books/@item.ImageFileName"
-                                 alt="@item.Title"
-                                 style="width:70px;
-                            height:90px;
-                            object-fit:cover;
-                            border-radius:5px;" />
-                        }
-                        else
-                        {
-                            <span class="text-muted">
-                                Chưa có ảnh
-                            </span>
-                        }
-
-                    </td>
-
-                    <!-- Chức năng -->
-                    <td>
-
-                        <a asp-action="Details"
-                           asp-route-id="@item.Id"
-                           class="btn btn-info">
-                            Chi tiết
-                        </a>
-
-                        <a asp-action="Edit"
-                           asp-route-id="@item.Id"
-                           class="btn btn-warning">
-                            Sửa
-                        </a>
-
-                        <a asp-action="Delete"
-                           asp-route-id="@item.Id"
-                           class="btn btn-danger">
-                            Xóa
-                        </a>
-
-                    </td>
-
-                </tr>
-            }
-
-        </tbody>
-
-    </table>
-
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync(
+            "_ValidationScriptsPartial");
+    }
+}
