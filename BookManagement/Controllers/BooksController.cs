@@ -1,4 +1,4 @@
-﻿using BookManagement.Data;
+using BookManagement.Data;
 using BookManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -58,7 +58,7 @@ namespace BookManagement.Controllers
         }
 
         // =====================================================
-        // THÊM SÁCH
+        // THÊM SÁCH + UPLOAD ẢNH
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -66,10 +66,37 @@ namespace BookManagement.Controllers
             Book book,
             IFormFile? ImageFile)
         {
+            // Kiểm tra file ảnh
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                string extension =
+                    Path.GetExtension(ImageFile.FileName)
+                        .ToLower();
+
+                // Chỉ cho phép JPG, JPEG, PNG
+                if (extension != ".jpg" &&
+                    extension != ".jpeg" &&
+                    extension != ".png")
+                {
+                    ModelState.AddModelError(
+                        "ImageFile",
+                        "Chỉ được upload file JPG hoặc PNG.");
+                }
+
+                // Giới hạn 5MB
+                if (ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError(
+                        "ImageFile",
+                        "Kích thước ảnh không được vượt quá 5MB.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                // Kiểm tra người dùng có chọn ảnh hay không
-                if (ImageFile != null && ImageFile.Length > 0)
+                // Nếu người dùng có chọn ảnh
+                if (ImageFile != null &&
+                    ImageFile.Length > 0)
                 {
                     // Đường dẫn thư mục lưu ảnh
                     string folderPath = Path.Combine(
@@ -77,25 +104,29 @@ namespace BookManagement.Controllers
                         "images",
                         "books");
 
-                    // Nếu thư mục chưa tồn tại thì tạo
+                    // Tạo thư mục nếu chưa tồn tại
                     if (!Directory.Exists(folderPath))
                     {
                         Directory.CreateDirectory(folderPath);
                     }
 
-                    // Lấy phần mở rộng của ảnh
+                    // Lấy phần mở rộng
                     string extension =
-                        Path.GetExtension(ImageFile.FileName);
+                        Path.GetExtension(ImageFile.FileName)
+                            .ToLower();
 
-                    // Tạo tên file ngẫu nhiên
+                    // Tạo tên file mới
                     string fileName =
-                        Guid.NewGuid().ToString() + extension;
+                        Guid.NewGuid().ToString()
+                        + extension;
 
-                    // Đường dẫn đầy đủ của file ảnh
+                    // Đường dẫn đầy đủ
                     string filePath =
-                        Path.Combine(folderPath, fileName);
+                        Path.Combine(
+                            folderPath,
+                            fileName);
 
-                    // Lưu ảnh vào thư mục
+                    // Lưu ảnh vào server
                     using (var stream =
                            new FileStream(
                                filePath,
@@ -108,7 +139,7 @@ namespace BookManagement.Controllers
                     book.ImageFileName = fileName;
                 }
 
-                // Thêm sách vào database
+                // Lưu sách
                 _context.Books.Add(book);
 
                 await _context.SaveChangesAsync();
@@ -140,7 +171,7 @@ namespace BookManagement.Controllers
         }
 
         // =====================================================
-        // SỬA SÁCH
+        // SỬA SÁCH + ĐỔI ẢNH
         // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -154,20 +185,48 @@ namespace BookManagement.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                // Lấy dữ liệu cũ từ database
-                var oldBook = await _context.Books
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == id);
+            // Lấy dữ liệu cũ
+            var oldBook = await _context.Books
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
 
-                if (oldBook == null)
+            if (oldBook == null)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra ảnh mới
+            if (ImageFile != null &&
+                ImageFile.Length > 0)
+            {
+                string extension =
+                    Path.GetExtension(ImageFile.FileName)
+                        .ToLower();
+
+                // Chỉ cho phép JPG, JPEG, PNG
+                if (extension != ".jpg" &&
+                    extension != ".jpeg" &&
+                    extension != ".png")
                 {
-                    return NotFound();
+                    ModelState.AddModelError(
+                        "ImageFile",
+                        "Chỉ được upload file JPG hoặc PNG.");
                 }
 
-                // Nếu người dùng chọn ảnh mới
-                if (ImageFile != null && ImageFile.Length > 0)
+                // Giới hạn 5MB
+                if (ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError(
+                        "ImageFile",
+                        "Kích thước ảnh không được vượt quá 5MB.");
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Nếu chọn ảnh mới
+                if (ImageFile != null &&
+                    ImageFile.Length > 0)
                 {
                     string folderPath = Path.Combine(
                         _environment.WebRootPath,
@@ -196,12 +255,12 @@ namespace BookManagement.Controllers
                         }
                     }
 
-                    // Lấy phần mở rộng ảnh mới
+                    // Tạo tên ảnh mới
                     string extension =
                         Path.GetExtension(
-                            ImageFile.FileName);
+                            ImageFile.FileName)
+                            .ToLower();
 
-                    // Tạo tên ảnh mới
                     string newFileName =
                         Guid.NewGuid().ToString()
                         + extension;
@@ -220,7 +279,7 @@ namespace BookManagement.Controllers
                         await ImageFile.CopyToAsync(stream);
                     }
 
-                    // Lưu tên ảnh mới vào database
+                    // Lưu tên ảnh mới
                     book.ImageFileName = newFileName;
                 }
                 else
@@ -263,7 +322,7 @@ namespace BookManagement.Controllers
         }
 
         // =====================================================
-        // XÓA SÁCH
+        // XÓA SÁCH + XÓA ẢNH
         // =====================================================
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -275,7 +334,7 @@ namespace BookManagement.Controllers
 
             if (book != null)
             {
-                // Xóa file ảnh
+                // Xóa file ảnh khỏi server
                 if (!string.IsNullOrEmpty(
                     book.ImageFileName))
                 {
@@ -286,15 +345,13 @@ namespace BookManagement.Controllers
                             "books",
                             book.ImageFileName);
 
-                    if (System.IO.File.Exists(
-                        imagePath))
+                    if (System.IO.File.Exists(imagePath))
                     {
-                        System.IO.File.Delete(
-                            imagePath);
+                        System.IO.File.Delete(imagePath);
                     }
                 }
 
-                // Xóa sách trong database
+                // Xóa sách khỏi database
                 _context.Books.Remove(book);
 
                 await _context.SaveChangesAsync();
