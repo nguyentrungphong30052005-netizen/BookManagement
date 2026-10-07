@@ -1,4 +1,4 @@
-﻿@model BookManagement.Models.Book
+@model BookManagement.Models.Book
 
 @{
     ViewData["Title"] = "Xóa sách";
@@ -6,7 +6,9 @@
 
 <div class="container mt-4">
 
-    <h2>XÓA SÁCH</h2>
+    <h2 class="fw-bold">
+        XÓA SÁCH
+    </h2>
 
     <div class="alert alert-danger">
         Bạn có chắc chắn muốn xóa sách này không?
@@ -14,37 +16,90 @@
 
     <dl class="row">
 
+        <!-- Mã sách -->
         <dt class="col-sm-3">
             Mã sách
         </dt>
+
         <dd class="col-sm-9">
             @Model.Id
         </dd>
 
+        <!-- Tên sách -->
         <dt class="col-sm-3">
             Tên sách
         </dt>
+
         <dd class="col-sm-9">
             @Model.Title
         </dd>
 
+        <!-- Tác giả -->
         <dt class="col-sm-3">
             Tác giả
         </dt>
+
         <dd class="col-sm-9">
             @Model.Author
         </dd>
 
+        <!-- Nhà xuất bản -->
+        <dt class="col-sm-3">
+            Nhà xuất bản
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.Publisher
+        </dd>
+
+        <!-- Giá -->
         <dt class="col-sm-3">
             Giá
         </dt>
+
         <dd class="col-sm-9">
             @Model.Price.ToString("N0") VNĐ
         </dd>
 
+        <!-- Ngày xuất bản -->
+        <dt class="col-sm-3">
+            Ngày xuất bản
+        </dt>
+
+        <dd class="col-sm-9">
+            @Model.PublishedDate.ToString("dd/MM/yyyy")
+        </dd>
+
+        <!-- Ảnh sách -->
+        <dt class="col-sm-3">
+            Ảnh sách
+        </dt>
+
+        <dd class="col-sm-9">
+
+            @if (!string.IsNullOrEmpty(Model.ImageFileName))
+            {
+                <img src="~/images/books/@Model.ImageFileName"
+                     alt="@Model.Title"
+                     style="width:150px;
+                height:200px;
+                object-fit:cover;
+                border-radius:8px;" />
+            }
+            else
+            {
+                <span class="text-muted">
+                    Chưa có ảnh
+                </span>
+            }
+
+        </dd>
+
     </dl>
 
-    <form asp-action="Delete" method="post">
+    <!-- Form xác nhận xóa -->
+    <form asp-action="Delete"
+          method="post">
 
         <input type="hidden"
                asp-for="Id" />
