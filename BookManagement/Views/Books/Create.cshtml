@@ -1,4 +1,4 @@
-﻿@model BookManagement.Models.Book
+@model BookManagement.Models.Book
 
 @{
     ViewData["Title"] = "Thêm sách";
@@ -106,7 +106,29 @@
             <input type="file"
                    name="ImageFile"
                    class="form-control"
-                   accept="image/*" />
+                   accept=".jpg,.jpeg,.png" />
+
+            <!-- Ảnh sách -->
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Ảnh sách
+                </label>
+
+                <input type="file"
+                       name="ImageFile"
+                       class="form-control"
+                       accept=".jpg,.jpeg,.png" />
+
+                <small class="text-muted">
+                    Chỉ chấp nhận file JPG, JPEG hoặc PNG. Tối đa 5MB.
+                </small>
+
+            </div>
+
+            <small class="text-muted">
+                Chỉ chấp nhận file JPG, JPEG hoặc PNG. Tối đa 5MB.
+            </small>
 
         </div>
 
