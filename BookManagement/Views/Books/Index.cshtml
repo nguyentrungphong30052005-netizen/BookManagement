@@ -1,131 +1,373 @@
-@model BookManagement.Models.Book
+using BookManagement.Data;
+using BookManagement.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-@{
-    ViewData["Title"] = "Thêm sách";
-}
+namespace BookManagement.Controllers
+{
+    public class BooksController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-<h1>Thêm sách</h1>
+        public BooksController(
+            ApplicationDbContext context,
+            IWebHostEnvironment environment)
+        {
+            _context = context;
+            _environment = environment;
+        }
 
-<hr />
+        // =========================
+        // INDEX
+        // =========================
+        public async Task<IActionResult> Index()
+        {
+            var books = await _context.Books.ToListAsync();
 
-<div class="row">
-    <div class="col-md-6">
+            return View(books);
+        }
 
-        <form asp-action="Create"
-              method="post"
-              enctype="multipart/form-data">
+        // =========================
+        // DETAILS
+        // =========================
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            @Html.AntiForgeryToken()
+            var book = await _context.Books
+                .FirstOrDefaultAsync(x => x.Id == id);
 
-            <div asp-validation-summary="All"
-                 class="text-danger">
-            </div>
+            if (book == null)
+            {
+                return NotFound();
+            }
 
-            <div class="form-group mb-3">
-                <label asp-for="Title"
-                       class="control-label">
-                </label>
+            return View(book);
+        }
 
-                <input asp-for="Title"
-                       class="form-control" />
+        // =========================
+        // CREATE - GET
+        // =========================
+        public IActionResult Create()
+        {
+            return View();
+        }
 
-                <span asp-validation-for="Title"
-                      class="text-danger">
-                </span>
-            </div>
+        // =========================
+        // CREATE - POST
+        // =========================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(
+            Book book,
+            IFormFile? ImageFile)
+        {
+            // Kiểm tra ảnh
+            ValidateImage(ImageFile);
 
-            <div class="form-group mb-3">
-                <label asp-for="Author"
-                       class="control-label">
-                </label>
+            // Nếu dữ liệu không hợp lệ
+            if (!ModelState.IsValid)
+            {
+                return View(book);
+            }
 
-                <input asp-for="Author"
-                       class="form-control" />
+            // Đường dẫn thư mục lưu ảnh
+            string folderPath = Path.Combine(
+                _environment.WebRootPath,
+                "images",
+                "books");
 
-                <span asp-validation-for="Author"
-                      class="text-danger">
-                </span>
-            </div>
+            // Tạo thư mục nếu chưa tồn tại
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
 
-            <div class="form-group mb-3">
-                <label asp-for="Publisher"
-                       class="control-label">
-                </label>
+            // Lấy đuôi file
+            string extension =
+                Path.GetExtension(
+                    ImageFile!.FileName)
+                .ToLowerInvariant();
 
-                <input asp-for="Publisher"
-                       class="form-control" />
+            // Tạo tên file ngẫu nhiên
+            string fileName =
+                Guid.NewGuid().ToString()
+                + extension;
 
-                <span asp-validation-for="Publisher"
-                      class="text-danger">
-                </span>
-            </div>
+            // Đường dẫn đầy đủ
+            string filePath =
+                Path.Combine(
+                    folderPath,
+                    fileName);
 
-            <div class="form-group mb-3">
-                <label asp-for="Price"
-                       class="control-label">
-                </label>
+            // Lưu ảnh
+            using (var stream =
+                   new FileStream(
+                       filePath,
+                       FileMode.Create))
+            {
+                await ImageFile.CopyToAsync(stream);
+            }
 
-                <input asp-for="Price"
-                       class="form-control" />
+            // Lưu tên ảnh vào database
+            book.ImageFileName = fileName;
 
-                <span asp-validation-for="Price"
-                      class="text-danger">
-                </span>
-            </div>
+            // Thêm sách
+            _context.Books.Add(book);
 
-            <div class="form-group mb-3">
-                <label asp-for="PublishedDate"
-                       class="control-label">
-                </label>
+            await _context.SaveChangesAsync();
 
-                <input asp-for="PublishedDate"
-                       class="form-control" />
+            return RedirectToAction(nameof(Index));
+        }
 
-                <span asp-validation-for="PublishedDate"
-                      class="text-danger">
-                </span>
-            </div>
+        // =========================
+        // EDIT - GET
+        // =========================
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            <!-- UPLOAD ẢNH -->
-            <div class="form-group mb-3">
+            var book =
+                await _context.Books.FindAsync(id);
 
-                <label class="control-label">
-                    Ảnh sách
-                </label>
+            if (book == null)
+            {
+                return NotFound();
+            }
 
-                <input type="file"
-                       name="ImageFile"
-                       class="form-control"
-                       accept=".jpg,.jpeg,.png" />
+            return View(book);
+        }
 
-                <small class="text-muted">
-                    Chỉ chấp nhận JPG, JPEG hoặc PNG.
-                    Kích thước tối đa 5MB.
-                </small>
+        // =========================
+        // EDIT - POST
+        // =========================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(
+            int id,
+            Book book,
+            IFormFile? ImageFile)
+        {
+            if (id != book.Id)
+            {
+                return NotFound();
+            }
 
-            </div>
+            // Lấy sách cũ
+            var oldBook =
+                await _context.Books
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x => x.Id == id);
 
-            <div class="form-group mt-3">
+            if (oldBook == null)
+            {
+                return NotFound();
+            }
 
-                <input type="submit"
-                       value="Thêm sách"
-                       class="btn btn-primary" />
+            // Chỉ kiểm tra ảnh nếu người dùng
+            // thực sự chọn ảnh mới
+            if (ImageFile != null &&
+                ImageFile.Length > 0)
+            {
+                ValidateImage(ImageFile);
+            }
 
-                <a asp-action="Index"
-                   class="btn btn-secondary">
-                    Quay lại
-                </a>
+            // Nếu dữ liệu không hợp lệ
+            if (!ModelState.IsValid)
+            {
+                return View(book);
+            }
 
-            </div>
+            // =========================
+            // CÓ ẢNH MỚI
+            // =========================
+            if (ImageFile != null &&
+                ImageFile.Length > 0)
+            {
+                string folderPath =
+                    Path.Combine(
+                        _environment.WebRootPath,
+                        "images",
+                        "books");
 
-        </form>
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
 
-    </div>
-</div>
+                // Xóa ảnh cũ
+                if (!string.IsNullOrEmpty(
+                    oldBook.ImageFileName))
+                {
+                    string oldImagePath =
+                        Path.Combine(
+                            folderPath,
+                            oldBook.ImageFileName);
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync(
-            "_ValidationScriptsPartial");
+                    if (System.IO.File.Exists(
+                        oldImagePath))
+                    {
+                        System.IO.File.Delete(
+                            oldImagePath);
+                    }
+                }
+
+                // Lấy đuôi ảnh mới
+                string extension =
+                    Path.GetExtension(
+                        ImageFile.FileName)
+                    .ToLowerInvariant();
+
+                // Tạo tên mới
+                string newFileName =
+                    Guid.NewGuid().ToString()
+                    + extension;
+
+                string newFilePath =
+                    Path.Combine(
+                        folderPath,
+                        newFileName);
+
+                // Lưu ảnh mới
+                using (var stream =
+                       new FileStream(
+                           newFilePath,
+                           FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(stream);
+                }
+
+                book.ImageFileName =
+                    newFileName;
+            }
+            else
+            {
+                // Không chọn ảnh mới
+                // giữ ảnh cũ
+                book.ImageFileName =
+                    oldBook.ImageFileName;
+            }
+
+            // Cập nhật sách
+            _context.Books.Update(book);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =========================
+        // DELETE - GET
+        // =========================
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var book =
+                await _context.Books
+                    .FirstOrDefaultAsync(
+                        x => x.Id == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            return View(book);
+        }
+
+        // =========================
+        // DELETE - POST
+        // =========================
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult>
+            DeleteConfirmed(int id)
+        {
+            var book =
+                await _context.Books.FindAsync(id);
+
+            if (book != null)
+            {
+                // Xóa ảnh
+                if (!string.IsNullOrEmpty(
+                    book.ImageFileName))
+                {
+                    string imagePath =
+                        Path.Combine(
+                            _environment.WebRootPath,
+                            "images",
+                            "books",
+                            book.ImageFileName);
+
+                    if (System.IO.File.Exists(
+                        imagePath))
+                    {
+                        System.IO.File.Delete(
+                            imagePath);
+                    }
+                }
+
+                // Xóa sách
+                _context.Books.Remove(book);
+
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =========================
+        // KIỂM TRA FILE ẢNH
+        // =========================
+        private void ValidateImage(
+            IFormFile? imageFile)
+        {
+            // Không chọn file
+            if (imageFile == null ||
+                imageFile.Length == 0)
+            {
+                ModelState.AddModelError(
+                    "ImageFile",
+                    "Vui lòng chọn ảnh.");
+                return;
+            }
+
+            // Lấy đuôi file
+            string extension =
+                Path.GetExtension(
+                    imageFile.FileName)
+                .ToLowerInvariant();
+
+            // Chỉ cho phép JPG, JPEG, PNG
+            if (extension != ".jpg" &&
+                extension != ".jpeg" &&
+                extension != ".png")
+            {
+                ModelState.AddModelError(
+                    "ImageFile",
+                    "Chỉ được upload file JPG, JPEG hoặc PNG.");
+            }
+
+            // Kiểm tra kích thước
+            if (imageFile.Length >
+                5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(
+                    "ImageFile",
+                    "Kích thước ảnh không được vượt quá 5MB.");
+            }
+        }
     }
 }
